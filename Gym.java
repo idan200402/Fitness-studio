@@ -19,7 +19,7 @@ public class Gym {
 
     public void setSecretary(Person p, int salary) {
         if(secretary != null){
-            secretary = null;
+            secretary.makeInactive();
         }
         secretary = new Secretary();
 
@@ -27,7 +27,9 @@ public class Gym {
     public Secretary getSecretary(){
         return secretary;
     }
-
+    public String getGymName() {
+        return gymName;
+    }
 
 
 }
