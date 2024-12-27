@@ -3,15 +3,13 @@ package gym.customers;
 import gym.management.Sessions.SessionType;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
-public class Instructor {
-    private Person p;
-    private int hourlyWage;
-    private ArrayList<SessionType> sessions;
+public class Instructor  extends Person{
+    private final int hourlyWage;
+    private final ArrayList<SessionType> sessions;
 
-    public Person getP() {
-        return p;
-    }
+
 
     public int getHourlyWage() {
         return hourlyWage;
@@ -22,9 +20,13 @@ public class Instructor {
     }
 
     public Instructor(Person p, int hourlyWage, ArrayList<SessionType> sessions) {
-        this.p = p;
+        super(p);
         this.hourlyWage = hourlyWage;
         this.sessions = new ArrayList<>(sessions);
+    }
+    @Override
+    public String toString() {
+        return super.toString() + " | Role: Instructor | Salary per Hour: " + hourlyWage + " | Certified Classes: " + sessions.stream().map(SessionType::toString).collect(Collectors.joining(", "));
     }
 
 

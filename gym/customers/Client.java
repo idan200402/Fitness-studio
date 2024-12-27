@@ -1,31 +1,44 @@
 package gym.customers;
 
-public class Client  {
-    Person p;
+import gym.Exception.InvalidAgeException;
+import gym.notifications.Observer;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+
+public class Client extends Person implements Observer {
+    private final ArrayList<String> notifications = new ArrayList<>();
+
+    public Client(String name, int balance, Gender gender, String birthDay) {
+        super(name, balance, gender, birthDay);
+    }
+
     public Client(Person p) {
-        this.p = p;
+        super(p);
     }
 
-    public String getName() {
-        return p.getName();
-    }
-    public int getBalance(){
-        return p.getBalance();
-    }
-    public void updateBalance(int charge){
-        p.setBalance(p.getBalance()-charge);
-    }
-    public Gender getGender(){
-        return p.getGender();
-    }
-    public String getBirthDay(){
-        return p.getBirthday();
+    public boolean isSenior() throws InvalidAgeException {
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate clientBD = LocalDate.parse(this.getBirthday(), format);
+        LocalDate currentDate = LocalDate.now();
+        int age = currentDate.getYear() - clientBD.getYear();
+        if (clientBD.getMonthValue() > currentDate.getMonthValue() || (clientBD.getMonthValue() == currentDate.getMonthValue()
+                && clientBD.getDayOfMonth() > currentDate.getDayOfMonth())) {
+            age--;
+        }
+        return age >= 65;
     }
 
+
+    @Override
+    public void update(String message) {
+        notifications.add(message);
+    }
+
+    public ArrayList<String> getNotifications() {
+        return notifications;
+    }
 
 }
-//    public Client(String name, int balance, Gender gender, String birthDay) {
-//        this.name = name;
-//        this.balance = balance;
-//        this.gender  = gender;
-//        this.birthday = birthDay;
+

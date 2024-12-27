@@ -2,10 +2,11 @@ package gym.Exception;
 
 public class ClientNotRegisteredException extends Exception {
     public ClientNotRegisteredException() {
+        super("~Error: Registration is required before attempting to unregister");
     }
 
     @Override
     public String getMessage() {
-        return "~Error: The client is not registered with the gym and cannot enroll in lessons";
+        return "~Error: Registration is required before attempting to unregister";
     }
 }
