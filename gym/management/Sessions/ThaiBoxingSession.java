@@ -14,8 +14,4 @@ public class ThaiBoxingSession extends Session{
         return "ThaiBoxing";
     }
 
-    @Override
-    public String toString() {
-        return "ThaiBoxing";
-    }
 }

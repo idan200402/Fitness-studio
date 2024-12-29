@@ -20,8 +20,5 @@ public class MachinePilatesSession extends Session {
         return "MachinePilates";
     }
 
-    @Override
-    public String toString() {
-        return "MachinePilates";
-    }
+
 }

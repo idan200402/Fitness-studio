@@ -22,12 +22,12 @@ public class Gym {
 
     public void setSecretary(Person p, int salary) {
         if(secretary != null){
-            Secretary newSecretary = new Secretary();
+            Secretary newSecretary = new Secretary(p , salary);
             secretary.transferData(newSecretary);
             secretary.makeInactive();
             secretary = newSecretary;
         }
-        else {secretary = new Secretary();}
+        else {secretary = new Secretary(p , salary);}
 
     }
     public Secretary getSecretary(){
@@ -35,9 +35,6 @@ public class Gym {
     }
     public String getGymName() {
         return gymName;
-    }
-    public Bank getBank(){
-        return bank;
     }
 
 

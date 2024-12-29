@@ -20,15 +20,20 @@ import java.util.ArrayList;
 import gym.notifications.Notifier.*;
 import gym.notifications.Observer;
 
-public class Secretary {
+public class Secretary extends Person {
     private final ArrayList<Client> clients = new ArrayList<>();
     private final ArrayList<Instructor> instructors = new ArrayList<>();
     private final ArrayList<Session> sessions = new ArrayList<>();
     private boolean isValid = true;
     private final Log log = new Log();
     private final Notifier notifier = new Notifier();
-    private final PaymentsManager paymentsManager = new PaymentsManager();
+    private static final PaymentsManager paymentsManager = new PaymentsManager();
+    private int salary;
 
+    public Secretary(Person p, int salary) {
+        super(p);
+        this.salary = salary;
+    }
     public Client registerClient(Person p) throws InvalidAgeException, DuplicateClientException {
         isActive();
         if (!p.validAge()) {
@@ -178,6 +183,7 @@ public class Secretary {
         newSecretary.instructors.addAll(instructors);
         newSecretary.sessions.addAll(sessions);
         newSecretary.log.add(log);
+
     }
     @Override
     public String toString() {

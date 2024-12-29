@@ -15,8 +15,5 @@ public class NinjaSession extends Session{
         return "Ninja";
     }
 
-    @Override
-    public String toString() {
-        return "Ninja";
-    }
+
 }

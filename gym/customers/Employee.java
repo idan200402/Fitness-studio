@@ -1,7 +1,6 @@
 package gym.customers;
 
 public class Employee extends Person {
-    private final String role;
     private final int salary;
 
     private Employee(Person p , String role, int salary) {
