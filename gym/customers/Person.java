@@ -11,10 +11,10 @@ import java.util.Objects;
 
 public  class Person {
     private final String name;
-    private Balance balance;
+    private final Balance balance;
     private final Gender gender;
     private final String birthday;
-    private String id;
+    private final String id;
 
 
     public String getName() {

@@ -13,7 +13,7 @@ public abstract class Session {
     private final ForumType forumType;
     private final Instructor instructor;
 
-    private  ArrayList<Client> clientsInSession;
+    private final ArrayList<Client> clientsInSession;
     private int price ;
     private int MAXCLIENTS;
     public void setPrice(int price){
