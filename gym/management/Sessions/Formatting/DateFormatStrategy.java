@@ -1,6 +1,7 @@
 package gym.management.Sessions.Formatting;
 
-public interface DateFormatStrategy {
-    String format(String date);
+public abstract class DateFormatStrategy {
+    public DateFormatStrategy(){}
+     abstract  String format(String date);
 }
 

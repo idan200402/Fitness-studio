@@ -5,30 +5,26 @@ import gym.management.Sessions.SessionType;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-public class Instructor  extends Person{
-    private final int hourlyWage;
+public class Instructor  extends Employee{
     private final ArrayList<SessionType> sessions;
-
-
-
-    public int getHourlyWage() {
-        return hourlyWage;
-    }
 
     public ArrayList<SessionType> getSessions() {
         return sessions;
     }
 
     public Instructor(Person p, int hourlyWage, ArrayList<SessionType> sessions) {
-        super(p);
-        this.hourlyWage = hourlyWage;
+        super(p , hourlyWage);
         this.sessions = new ArrayList<>(sessions);
     }
+
+
     @Override
-    public String toString() {
-        return super.toString() + " | Role: Instructor | Salary per Hour: " + hourlyWage + " | Certified Classes: " + sessions.stream().map(SessionType::toString).collect(Collectors.joining(", "));
+    public String getRole() {
+        return "Instructor";
     }
 
-
-
+    @Override
+     protected String getDescription() {
+        return "Salary per Hour: " + super.getSalary() + " | Certified Classes: " + SessionType.arrayListToString(sessions);
+    }
 }

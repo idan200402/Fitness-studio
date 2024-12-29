@@ -4,12 +4,10 @@ import gym.Exception.ClientNotRegisteredException;
 import gym.Exception.DuplicateClientException;
 import gym.Exception.InstructorNotQualifiedException;
 import gym.Exception.InvalidAgeException;
-import gym.customers.Client;
-import gym.customers.Gender;
-import gym.customers.Instructor;
-import gym.customers.Person;
+import gym.customers.*;
 import gym.management.Sessions.*;
 import gym.management.Sessions.Formatting.DateFormatStrategy;
+import gym.management.Sessions.Formatting.LogDateFormat;
 import gym.notifications.Notifier;
 
 import java.time.LocalDate;
@@ -20,7 +18,7 @@ import java.util.ArrayList;
 import gym.notifications.Notifier.*;
 import gym.notifications.Observer;
 
-public class Secretary extends Person {
+public class Secretary extends Employee {
     private final ArrayList<Client> clients = new ArrayList<>();
     private final ArrayList<Instructor> instructors = new ArrayList<>();
     private final ArrayList<Session> sessions = new ArrayList<>();
@@ -28,32 +26,33 @@ public class Secretary extends Person {
     private final Log log = new Log();
     private final Notifier notifier = new Notifier();
     private static final PaymentsManager paymentsManager = new PaymentsManager();
-    private int salary;
+    private final LogDateFormat format = new LogDateFormat();
 
     public Secretary(Person p, int salary) {
-        super(p);
-        this.salary = salary;
+        super(p , salary);
+
     }
     public Client registerClient(Person p) throws InvalidAgeException, DuplicateClientException {
         isActive();
         if (!p.validAge()) {
-            throw new InvalidAgeException("~Error: Client must be at least 18 years old to register");
+            throw new InvalidAgeException("Error: Client must be at least 18 years old to register");
         }
-        Client c = new Client(p);
+        p = new Client(p);
+        Client c=(Client)p;
         if (clientRegistered(c)) {
-            throw new DuplicateClientException();
+            throw new DuplicateClientException("Error: The client is already registered");
         }
         clients.add(c);
-        log.addAction("~Registered new client: " + c.getName());
+        log.addAction("Registered new client: " + c.getName());
         return c;
     }
 
     public void unregisterClient(Client c) throws ClientNotRegisteredException {
         isActive();
         if (clients.remove(c)) {
-            log.addAction("~Unregistered client: " + c.getName());
+            log.addAction("Unregistered client: " + c.getName());
         } else {
-            throw new ClientNotRegisteredException();
+            throw new ClientNotRegisteredException("Error: Registration is required before attempting to unregister");
         }
 
     }
@@ -67,7 +66,7 @@ public class Secretary extends Person {
         isActive();
         Instructor instructor = new Instructor(p, i, sessionTypes);
         instructors.add(instructor);
-        log.addAction("~Hired new instructor: " + instructor.getName() + " with salary per hour: " + i);
+        log.addAction("Hired new instructor: " + instructor.getName() + " with salary per hour: " + i);
         return instructor;
     }
 
@@ -78,14 +77,14 @@ public class Secretary extends Person {
         }
         Session session = SessionFactory.createSession(sessionType, date, forumType, instructor);
         sessions.add(session);
-        log.addAction("Created new session: " + session.toString() + " on " + dateToLog(date) + " with instructor: " + instructor.getName());
+        log.addAction("Created new session: " + session.getSessionType() + " on " + format.format(date) + " with instructor: " + instructor.getName());
         return session;
 
     }
 
     private void isActive() {
         if (!isValid) {
-            throw new NullPointerException("~Secretary is not active");
+            throw new NullPointerException("Secretary is not active");
         }
     }
 
@@ -95,30 +94,45 @@ public class Secretary extends Person {
 
 
     public void registerClientToLesson(Client c, Session s) throws InvalidAgeException, DuplicateClientException, ClientNotRegisteredException {
+        boolean flag = false;
         isActive();
-        if (!c.isSenior() && s.getForumType() == ForumType.Seniors) {
-            log.addAction("~Failed registration: Client doesn't meet the age requirements for this session (Seniors)");
-            return;
+        if(!clients.contains(c))
+            throw new ClientNotRegisteredException("Error: The client is not registered with the gym and cannot enroll in lessons");
+        if(s.getClientsInSession().contains(c))
+            throw new DuplicateClientException("Error: The client is already registered for this lesson");
+        if (s.isSessionOccurred()) {
+            flag = true;
+            log.addAction("Failed registration: Session is not in the future");
         }
         if ((s.getForumType() == ForumType.Male && c.getGender() != Gender.Male) || (s.getForumType() == ForumType.Female && c.getGender() != Gender.Female)) {
-            log.addAction("~Failed registration: Client's gender doesn't match the session's gender requirements");
-            return;
-        }
-        if (s.isSessionOccurred()) {
-            log.addAction("~Failed registration: Session is not in the future");
-            return;
+            flag = true;
+            log.addAction("Failed registration: Client's gender doesn't match the session's gender requirements");
         }
         if (s.getPrice() > c.getBalance()) {
-            log.addAction("~Failed registration: Client doesn't have enough balance");
-            return;
+            flag = true;
+            log.addAction("Failed registration: Client doesn't have enough balance");
+        }
+        if (!c.isSenior() && s.getForumType() == ForumType.Seniors) {
+            flag = true;
+            log.addAction("Failed registration: Client doesn't meet the age requirements for this session (Seniors)");
         }
         if (!clients.contains(c)) {
-            log.addAction("~Failed registration: Client is already registered");
-            return;
+            flag = true;
+            log.addAction("Failed registration: Client is already registered");
         }
-        c.setBalance(c.getBalance() - s.getPrice());
-        s.addToSession(c);
-        log.addAction("~Registered client: " + c.getName() + " to session: " + s.getSessionType() + " on " + s.getDate() + " for price :" + s.getPrice());
+        if(s.getClientsInSession().size() >= s.getMAXCLIENTS()){
+            flag = true;
+            log.addAction("Failed registration: No available spots for session");
+        }
+        if(s.getClientsInSession().contains(c)){
+            flag = true;
+            log.addAction("Failed registration: Client is already registered to this session");
+        }
+        if(!flag) {
+            paymentsManager.collectMoney(c, s);
+            s.addToSession(c);
+            log.addAction("Registered client: " + c.getName() + " to session: " + s.getSessionType() + " on " + format.format(s.getDate()) + " for price: " + s.getPrice());
+        }
 
     }
 
@@ -126,17 +140,24 @@ public class Secretary extends Person {
         isActive();
         for (Session session : sessions) {
             paymentsManager.payInstructor(session.getInstructor());
-            paymentsManager.collectMoney(session);
         }
+        paymentsManager.paySecretary(this);
+
+        log.addAction("Salaries have been paid to all employees");
 
     }
 
     public void notify(Session session, String message) {
         isActive();
         log.addAction(notifier.notifySession(session, message));
-        for (Observer observer : session.getClientsInSession()) {
-            observer.update(message);
+        for (Client client : session.getClientsInSession()) {
+            if(clients.contains(client)) {
+                client.update(message);
+            }
+            else System.out.println("Error: The client is not registered with the gym and cannot enroll in lessons");
         }
+
+
     }
 
     public void notify(String date, String message) {
@@ -160,18 +181,12 @@ public class Secretary extends Person {
     public void notify(String message) {
         isActive();
         log.addAction(notifier.notifyAll(message));
-        for (Client client : clients) {
-            client.update(message);
+        for (Client client : clients){
+                if(clients.contains(client))client.update(message);
+                else System.out.println("Error: The client is not registered with the gym and cannot enroll in lessons");
         }
-    }
 
-    private String dateToLog(String date) {
-        DateTimeFormatter format1 = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-        LocalDateTime dateTime = LocalDateTime.parse(date, format1);
-        DateTimeFormatter format2 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-        return dateTime.format(format2);
     }
-
     public void printActions() {
         isActive();
         log.print();
@@ -185,9 +200,30 @@ public class Secretary extends Person {
         newSecretary.log.add(log);
 
     }
+
     @Override
-    public String toString() {
+    public String getRole() {
         return "Secretary";
     }
+    @Override
+    public String getDescription() {
+        return "Salary per Month: " + getSalary();
+    }
+    public PaymentsManager getPaymentsManager() {
+        return paymentsManager;
+    }
+    public ArrayList<Client> getClients() {
+        return clients;
+    }
+    public ArrayList<Instructor> getInstructors() {
+        return instructors;
+    }
+    public ArrayList<Session> getSessions() {
+        return sessions;
+    }
+    public Log getLog() {
+        return log;
+    }
+
 
 }

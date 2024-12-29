@@ -50,10 +50,7 @@ public abstract class Session {
     public ArrayList<Client> getClientsInSession() {
         return clientsInSession;
     }
-    public void addToSession(Client client) throws DuplicateClientException {
-        if(clientsInSession.contains(client)){
-            throw new DuplicateClientException();
-        }
+    public void addToSession(Client client){
         clientsInSession.add(client);
     }
     public abstract String getSessionType();

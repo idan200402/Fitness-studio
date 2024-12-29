@@ -39,6 +39,12 @@ public class Client extends Person implements Observer {
     public ArrayList<String> getNotifications() {
         return notifications;
     }
+    @Override
+    public void setBalance(int balance) {
+        super.setBalance(balance);
+
+
+    }
 
 }
 

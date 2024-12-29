@@ -1,6 +1,7 @@
 package gym.customers;
 
 import gym.Exception.InvalidAgeException;
+import gym.management.Balance;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -10,7 +11,7 @@ import java.util.Objects;
 
 public  class Person {
     private final String name;
-    private    int balance;
+    private Balance balance;
     private final Gender gender;
     private final String birthday;
     private String id;
@@ -21,7 +22,7 @@ public  class Person {
     }
 
     public int getBalance() {
-        return balance;
+        return balance.getMoney();
     }
 
     public Gender getGender() {
@@ -32,12 +33,12 @@ public  class Person {
         return birthday;
     }
     public void setBalance(int balance) {
-        this.balance = balance;
+        this.balance.setMoney(balance);
     }
 
     public Person(String name, int balance, Gender gender, String birthDay) {
         this.name = name;
-        this.balance = balance;
+        this.balance = new Balance(balance);
         this.gender  = gender;
         this.birthday = birthDay;
         this.id = IDGenerate.generate();
@@ -47,7 +48,9 @@ public  class Person {
         this.name = p.getName();
         this.birthday = p.getBirthday();
         this.gender = p.getGender();
-        this.balance = p.getBalance();
+        this.balance = p.balance;
+        this.id = p.id;
+
     }
     public boolean validAge() {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -66,9 +69,9 @@ public  class Person {
     }
     @Override
     public String toString() {
-        return "    ~ID: " + id + " | Name: " + name + " | Gender: " + gender +
+        return "ID: " + id + " | Name: " + name + " | Gender: " + gender +
                 " | Birthday: " + birthday + " | Age: " + ageCalculator() +
-                " | Balance: " + balance;
+                " | Balance: " + balance.getMoney();
     }
 
     private int ageCalculator() {

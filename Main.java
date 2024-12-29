@@ -118,7 +118,6 @@ public class Main {
         }
 
         System.out.println("\n---Actions history---");
-
         newGymSecretary.printActions();
 
         System.out.println("\n" + c1.getName() + " Notifications: " + c1.getNotifications());

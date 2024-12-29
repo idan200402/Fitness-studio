@@ -10,14 +10,19 @@ public class PaymentsManager {
         this.bank = new Bank(0);
     }
     public void payInstructor(Instructor instructor){
-        instructor.setBalance(instructor.getBalance() + instructor.getHourlyWage());
-        bank.withdraw(instructor.getHourlyWage());
+        bank.withdraw(instructor.getSalary());
+        instructor.setBalance(instructor.getBalance() + instructor.getSalary());
     }
-    public void collectMoney(Session session){
-        for(Client c : session.getClientsInSession()){
-            c.setBalance(c.getBalance() - session.getPrice());
-            bank.deposit(session.getPrice());
-        }
+    public void collectMoney(Client client , Session session){
+        client.setBalance(client.getBalance() - session.getPrice());
+        bank.deposit(session.getPrice());
+    }
+    public void paySecretary(Secretary secretary){
+        bank.withdraw(secretary.getSalary());
+        secretary.setBalance(secretary.getBalance() + secretary.getSalary());
+    }
+    public Bank getBank(){
+        return bank;
     }
 
 }
